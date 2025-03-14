@@ -6,6 +6,7 @@
   height: 70vh;
   margin: 0 auto;
   border-radius: 1.5rem;
+  z-index: 1;
 }
 
 .custom-cross-icon {
