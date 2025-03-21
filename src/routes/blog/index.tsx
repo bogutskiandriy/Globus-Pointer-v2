@@ -1,5 +1,5 @@
 import { component$ } from "@builder.io/qwik";
-import { BlogPostList } from "~/components/BlogPostList";
+import { BlogPostList } from "~/components/blogPostList";
 import { Header } from "~/components/header";
 import { Footer } from "~/components/footer";
 
