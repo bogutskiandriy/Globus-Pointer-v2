@@ -1,4 +1,3 @@
-
 import { component$ } from '@builder.io/qwik';
 
 export const Footer = component$(() => {
@@ -9,8 +8,9 @@ export const Footer = component$(() => {
           <div>
             <h3 class="text-lg font-bold mb-4">About Us</h3>
             <p class="text-gray-400">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-              Sed do eiusmod tempor incididunt ut labore.
+              This project, Globus Pointer v2, is designed to provide an intuitive and seamless user experience. 
+              It leverages modern web technologies to deliver high performance and scalability, 
+              empowering developers and users alike.
             </p>
           </div>
           

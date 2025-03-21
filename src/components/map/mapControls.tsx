@@ -31,9 +31,9 @@ export const MapControls = component$((props: MapControlsProps) => {
         </button>
       </div>
 
-      <div class="mt-2">{props.centerCoordinates}</div>
-      {props.markerCoordinates && <div>{props.markerCoordinates}</div>}
-      {props.distance && <div>{props.distance}</div>}
+      <div class="mt-2 text-white">{props.centerCoordinates}</div>
+      {props.markerCoordinates && <div class="mt-2 text-white">{props.markerCoordinates}</div>}
+      {props.distance && <div class="mt-2 text-white">{props.distance}</div>}
     </div>
   );
 });
