@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import blogRoutes from "./routes/blog.ts";
+// import blogRoutes from "./routes/blog.ts";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -12,7 +12,7 @@ const BACKEND = process.env['BACKEND_URL'];
 app.use(cors());
 app.use(express.json());
 
-app.use("./content", blogRoutes);
+// app.use("./content", blogRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server start on ${BACKEND}:${PORT}`);
