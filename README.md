@@ -1,16 +1,15 @@
-# Qwik City App ⚡️
+# Globus Pointer v2 🌍
 
-- [Qwik Docs](https://qwik.dev/)
-- [Discord](https://qwik.dev/chat)
-- [Qwik GitHub](https://github.com/QwikDev/qwik)
-- [@QwikDev](https://twitter.com/QwikDev)
-- [Vite](https://vitejs.dev/)
+- [Documentation](https://your-project-docs-link.com/)
+- [Support](https://your-project-support-link.com/)
+- [GitHub Repository](https://github.com/your-org/globus-pointer-v2)
+- [Twitter](https://twitter.com/your-project-handle)
 
 ---
 
 ## Project Structure
 
-This project is using Qwik with [QwikCity](https://qwik.dev/qwikcity/overview/). QwikCity is just an extra set of tools on top of Qwik to make it easier to build a full site, including directory-based routing, layouts, and more.
+This project is built using modern web technologies to provide a robust and scalable solution for [describe your project's purpose briefly].
 
 Inside your project, you'll see the following directory structure:
 
@@ -24,42 +23,42 @@ Inside your project, you'll see the following directory structure:
         └── ...
 ```
 
-- `src/routes`: Provides the directory-based routing, which can include a hierarchy of `layout.tsx` layout files, and an `index.tsx` file as the page. Additionally, `index.ts` files are endpoints. Please see the [routing docs](https://qwik.dev/qwikcity/routing/overview/) for more info.
+- `src/routes`: Handles routing and endpoints for the application. Includes layout and page files. Refer to the [routing docs](https://your-routing-docs-link.com/) for more details.
 
-- `src/components`: Recommended directory for components.
+- `src/components`: Contains reusable UI components.
 
-- `public`: Any static assets, like images, can be placed in the public directory. Please see the [Vite public directory](https://vitejs.dev/guide/assets.html#the-public-directory) for more info.
+- `public`: Stores static assets like images and other files. See the [Vite public directory](https://vitejs.dev/guide/assets.html#the-public-directory) for more info.
 
-## Add Integrations and deployment
+## Add Integrations and Deployment
 
-Use the `bun qwik add` command to add additional integrations. Some examples of integrations includes: Cloudflare, Netlify or Express Server, and the [Static Site Generator (SSG)](https://qwik.dev/qwikcity/guides/static-site-generation/).
+Use the `bun qwik add` command to add integrations such as Cloudflare, Netlify, or Express Server. You can also enable [Static Site Generation (SSG)](https://your-ssg-docs-link.com/).
 
 ```shell
-bun qwik add # or `bun qwik add`
+bun qwik add
 ```
 
 ## Development
 
-Development mode uses [Vite's development server](https://vitejs.dev/). The `dev` command will server-side render (SSR) the output during development.
+Development mode uses [Vite's development server](https://vitejs.dev/). The `dev` command will enable server-side rendering (SSR) during development.
 
 ```shell
 npm start # or `bun start`
 ```
 
-> Note: during dev mode, Vite may request a significant number of `.js` files. This does not represent a Qwik production build.
+> Note: During development, Vite may request a significant number of `.js` files. This does not represent the production build.
 
 ## Preview
 
-The preview command will create a production build of the client modules, a production build of `src/entry.preview.tsx`, and run a local server. The preview server is only for convenience to preview a production build locally and should not be used as a production server.
+The preview command generates a production build of the client modules, builds `src/entry.preview.tsx`, and runs a local server for testing purposes.
 
 ```shell
-bun preview # or `bun preview`
+bun preview
 ```
 
 ## Production
 
-The production build will generate client and server modules by running both client and server build commands. The build command will use Typescript to run a type check on the source code.
+The production build generates optimized client and server modules. It also runs a type check on the source code using TypeScript.
 
 ```shell
-bun build # or `bun build`
+bun build
 ```
