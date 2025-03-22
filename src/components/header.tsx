@@ -39,9 +39,9 @@ export const Header = component$(() => {
         </nav>
         <div class={`mobile-menu ${state.isOpen ? 'open' : 'closed'} md:hidden flex flex-col space-y-4 mt-4`}>
           <a href="/" class="hover:text-gray-300">Home</a>
-          <a href="/about" class="hover:text-gray-300">About</a>
-          <a href="/services" class="hover:text-gray-300">Services</a>
-          <a href="/contact" class="hover:text-gray-300">Contact</a>
+          <a href="/docs" class="hover:text-gray-300">Docs</a>
+          <a href="/tutorial" class="hover:text-gray-300">Tutorial</a>
+          <a href="/blog" class="hover:text-gray-300">Blog</a>
         </div>
       </div>
     </header>

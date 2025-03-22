@@ -6,8 +6,15 @@ export default component$(() => {
   useTask$(async ({ track }) => {
     const slug = window.location.pathname.split("/").pop();
     track(() => slug);
-    const response = await fetch(`/api/blog-posts/${slug}`);
-    post.value = await response.json();
+    try {
+      const response = await fetch(`http://localhost:8000/posts${slug}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch blog post");
+      }
+      post.value = await response.json();
+    } catch (error) {
+      console.error("Error fetching blog post:", error);
+    }
   });
 
   if (!post.value) {
@@ -15,9 +22,12 @@ export default component$(() => {
   }
 
   return (
-    <article>
+    <article class="p-6 bg-gray-900 text-white min-h-screen">
       <h1 class="text-3xl font-bold mb-4">{post.value.title}</h1>
-      <div dangerouslySetInnerHTML={post.value.content}></div> {/* Fixed dangerouslySetInnerHTML */}
+      <div
+        class="prose prose-invert"
+        dangerouslySetInnerHTML={post.value.content} // Fixed
+      ></div>
     </article>
   );
 });

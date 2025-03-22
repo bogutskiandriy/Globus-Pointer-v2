@@ -1,6 +1,8 @@
-import { component$ } from '@builder.io/qwik';
+import { component$, useSignal } from '@builder.io/qwik';
 
 export const Footer = component$(() => {
+  const year = useSignal(new Date().getFullYear());
+
   return (
     <footer class="bg-gray-800 text-white py-8">
       <div class="container mx-auto px-4">
@@ -54,7 +56,7 @@ export const Footer = component$(() => {
         </div>
 
         <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; {new Date().getFullYear()} Andriy Bogutski. All rights reserved.</p>
+          <p>&copy; {year.value} Andriy Bogutski. All rights reserved.</p>
         </div>
       </div>
     </footer>
