@@ -6,19 +6,17 @@ import 'leaflet/dist/leaflet.css';
 import './map.css';
 
 export const Map = component$(() => {
-  // Глобальний стан для збереження координат, перемикання шару, відстані та температури
+  // Глобальний стан для збереження координат, перемикання шару, відстані та даних погоди
   const state = useStore<{
     centerCoordinates: string;
     markerCoordinates: string;
     useEsri: boolean;
     distance: string;
-    temperature: string;
   }>({
     centerCoordinates: 'Center: 0, 0',
     markerCoordinates: 'Marker: 0, 0',
     useEsri: true,
     distance: 'Distance: 0 m',
-    temperature: 'Temperature: 0°C',
   });
 
   useVisibleTask$(() => {
@@ -34,34 +32,6 @@ export const Map = component$(() => {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Функція оновлення центру карти та завантаження погоди для центру («+»)
-    const updateCenterCoordinates = async () => {
-      const center = map.getCenter();
-      const { lat, lng } = center;
-      state.centerCoordinates = `Center: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-      crossMarker.setLatLng(center);
-
-      try {
-        const res = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`
-        );
-        const data = await res.json();
-        if (data.current_weather) {
-          state.temperature = `Temperature: ${data.current_weather.temperature}°C`;
-        } else {
-          state.temperature = 'Temperature: N/A';
-        }
-      } catch (error) {
-        console.error('Помилка отримання даних погоди:', error);
-        state.temperature = 'Temperature: Error';
-      }
-    };
-
-    // Викликаємо оновлення координат та погоди при русі та зумі карти
-    map.on('move', updateCenterCoordinates);
-    map.on('moveend', updateCenterCoordinates);
-    map.on('zoomend', updateCenterCoordinates);
-
     // Створення центрального маркера з плюсом для позначення центру карти
     const crossIcon = L.divIcon({
       className: 'custom-cross-icon',
@@ -70,6 +40,19 @@ export const Map = component$(() => {
       iconAnchor: [10, 27],
     });
     const crossMarker = L.marker(map.getCenter(), { icon: crossIcon, interactive: false }).addTo(map);
+
+    // Функція оновлення центру карти та завантаження даних погоди для центру («+»)
+    const updateCenterCoordinates = async () => {
+      const center = map.getCenter();
+      const { lat, lng } = center;
+      state.centerCoordinates = `Center: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      crossMarker.setLatLng(center);
+    };
+
+    // Викликаємо оновлення даних погоди при русі та зумі карти
+    map.on('move', updateCenterCoordinates);
+    map.on('moveend', updateCenterCoordinates);
+    map.on('zoomend', updateCenterCoordinates);
 
     // Перемикання базових шарів (Esri/OSM)
     const switchLayer = () => {
@@ -82,7 +65,6 @@ export const Map = component$(() => {
         { attribution: state.useEsri ? '&copy; Esri' : '&copy; OpenStreetMap' }
       ).addTo(map);
     };
-
     document.getElementById('switch-map-button')?.addEventListener('click', switchLayer);
 
     // Масив для збереження маркерів
@@ -164,7 +146,7 @@ export const Map = component$(() => {
       }
     });
 
-    // Початкове завантаження погоди для центра карти
+    // Початкове завантаження даних погоди для центра карти
     updateCenterCoordinates();
   });
 
@@ -172,10 +154,10 @@ export const Map = component$(() => {
     <div class="flex flex-col items-center m-5">
       <div id="map" class="w-full h-[500px]" />
       <MapControls
+        useEsri={state.useEsri}
         centerCoordinates={state.centerCoordinates}
         markerCoordinates={state.markerCoordinates}
         distance={state.distance}
-        temperature={state.temperature}
       />
     </div>
   );

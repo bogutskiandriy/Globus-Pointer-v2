@@ -3,7 +3,6 @@ import cors from "cors";
 import fs from "fs";
 import path from 'path';
 import dotenv from "dotenv";
-// import blogRoutes from "./routes/blog.ts";
 
 interface Post {
   title: string;
@@ -19,8 +18,6 @@ const BACKEND = process.env['BACKEND_URL'];
 
 app.use(cors());
 app.use(express.json());
-
-// app.use("./content", blogRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server start on ${BACKEND}:${PORT}`);
@@ -38,3 +35,5 @@ const posts: Post[] = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 app.get("/api/posts", (_, res) => {
   res.json(posts.map((post) => ({ title: post.title, date: post.date, description: post.description })));
 });
+
+
