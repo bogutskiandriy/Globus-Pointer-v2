@@ -27,6 +27,29 @@ app.get("/", (_, res) => {
   res.send("Сервер працює!");
 });
 
+app.post("/api/weather", async (req, res) => {
+  const { latitude, longitude } = req.body;
+
+  if (typeof latitude !== "number" || typeof longitude !== "number") {
+    return res.status(400).json({ error: "Invalid input. Latitude and longitude must be numbers." });
+  }
+
+  console.log(`Received coordinates: lat=${latitude}, lng=${longitude}`);
+
+  // Імітація отримання погоди (в майбутньому можна додати API)
+  const weatherData = {
+    location: { latitude, longitude },
+    temperature: Math.floor(Math.random() * 30), // Випадкова температура
+    condition: "Sunny", // Просто тестове значення
+  };
+
+  res.json({ weatherData });
+
+  console.log("Weather data sent:", weatherData);
+});
+
+
+
 // test data for blog posts
 
 const filePath = path.resolve('src', 'data', 'posts.json');

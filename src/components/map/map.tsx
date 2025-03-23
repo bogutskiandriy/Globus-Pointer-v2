@@ -1,11 +1,15 @@
 import { component$, useStore, useVisibleTask$ } from '@builder.io/qwik';
 import L from 'leaflet';
 import { getDistance } from 'geolib';
+import dotenv from "dotenv";
 import { MapControls } from './mapControls';
 import 'leaflet/dist/leaflet.css';
 import './map.css';
 
+dotenv.config();
+
 export const Map = component$(() => {
+
   // Глобальний стан для збереження координат, перемикання шару, відстані та даних погоди
   const state = useStore<{
     centerCoordinates: string;
@@ -53,6 +57,35 @@ export const Map = component$(() => {
     map.on('move', updateCenterCoordinates);
     map.on('moveend', updateCenterCoordinates);
     map.on('zoomend', updateCenterCoordinates);
+
+    // Відправляєм дані з + на сервер для отримання погоди
+    const sendWeatherData = async () => {
+      const center = map.getCenter();
+      const { lat, lng } = center;
+    
+      try {
+        const response = await fetch('http://localhost:8000/api/weather', {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ latitude: lat, longitude: lng }),
+        });
+    
+        if (!response.ok) {
+          console.error("Failed to fetch weather data");
+          return;
+        }
+    
+        const weatherData = await response.json();
+        console.log("Weather data:", weatherData);
+      } catch (error) {
+        console.error("Error sending weather data:", error);
+      }
+    };
+
+    updateCenterCoordinates();
+    sendWeatherData();
 
     // Перемикання базових шарів (Esri/OSM)
     const switchLayer = () => {
@@ -145,9 +178,6 @@ export const Map = component$(() => {
         }
       }
     });
-
-    // Початкове завантаження даних погоди для центра карти
-    updateCenterCoordinates();
   });
 
   return (
