@@ -4,6 +4,7 @@ interface MapControlsProps {
   centerCoordinates: string;
   markerCoordinates: string;
   distance: string;
+  temperature: string;
 }
 
 export const MapControls = component$((props: MapControlsProps) => {
@@ -34,6 +35,7 @@ export const MapControls = component$((props: MapControlsProps) => {
       <div class="mt-2 text-white">{props.centerCoordinates}</div>
       {props.markerCoordinates && <div class="mt-2 text-white">{props.markerCoordinates}</div>}
       {props.distance && <div class="mt-2 text-white">{props.distance}</div>}
+      <div class="mt-2 text-white">{props.temperature}</div>
     </div>
   );
 });

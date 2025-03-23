@@ -35,6 +35,6 @@ app.get("/", (_, res) => {
 const filePath = path.resolve('src', 'data', 'posts.json');
 const posts: Post[] = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 
-app.get("/posts", (_, res) => {
+app.get("/api/posts", (_, res) => {
   res.json(posts.map((post) => ({ title: post.title, date: post.date, description: post.description })));
 });

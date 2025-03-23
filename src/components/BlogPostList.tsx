@@ -17,7 +17,7 @@ export const BlogPostList = component$(() => {
 
   useTask$(async () => {
     try {
-      const response = await fetch(`${BACKEND}/posts`); // Use the BACKEND constant
+      const response = await fetch(`${BACKEND}/api/posts`); // Use the BACKEND constant
       if (!response.ok) {
         throw new Error("Failed to fetch blog posts");
       }

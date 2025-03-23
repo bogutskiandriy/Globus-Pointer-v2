@@ -6,18 +6,19 @@ import 'leaflet/dist/leaflet.css';
 import './map.css';
 
 export const Map = component$(() => {
-    
-  // Загальний стан для координат, перемикання шару та обчисленої відстані
+  // Глобальний стан для збереження координат, перемикання шару, відстані та температури
   const state = useStore<{
     centerCoordinates: string;
     markerCoordinates: string;
     useEsri: boolean;
     distance: string;
+    temperature: string;
   }>({
     centerCoordinates: 'Center: 0, 0',
     markerCoordinates: 'Marker: 0, 0',
     useEsri: true,
     distance: 'Distance: 0 m',
+    temperature: 'Temperature: 0°C',
   });
 
   useVisibleTask$(() => {
@@ -25,15 +26,52 @@ export const Map = component$(() => {
     if (!mapElement || mapElement.dataset.loaded) return;
     mapElement.dataset.loaded = 'true';
 
-    // Ініціалізація карти
-    const map = L.map(mapElement).setView([50.4501, 30.5234], 12);
+    // Ініціалізація карти (початковий вигляд для Львова)
+    const map = L.map(mapElement).setView([49.8397, 24.0297], 10);
 
-    let tileLayer = L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      { attribution: '&copy; Esri' }
-    ).addTo(map);
+    // Додавання шару OpenStreetMap
+    let tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
 
-    // Функція перемикання шару базової карти
+    // Функція оновлення центру карти та завантаження погоди для центру («+»)
+    const updateCenterCoordinates = async () => {
+      const center = map.getCenter();
+      const { lat, lng } = center;
+      state.centerCoordinates = `Center: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      crossMarker.setLatLng(center);
+
+      try {
+        const res = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`
+        );
+        const data = await res.json();
+        if (data.current_weather) {
+          state.temperature = `Temperature: ${data.current_weather.temperature}°C`;
+        } else {
+          state.temperature = 'Temperature: N/A';
+        }
+      } catch (error) {
+        console.error('Помилка отримання даних погоди:', error);
+        state.temperature = 'Temperature: Error';
+      }
+    };
+
+    // Викликаємо оновлення координат та погоди при русі та зумі карти
+    map.on('move', updateCenterCoordinates);
+    map.on('moveend', updateCenterCoordinates);
+    map.on('zoomend', updateCenterCoordinates);
+
+    // Створення центрального маркера з плюсом для позначення центру карти
+    const crossIcon = L.divIcon({
+      className: 'custom-cross-icon',
+      html: '+',
+      iconSize: [20, 20],
+      iconAnchor: [10, 27],
+    });
+    const crossMarker = L.marker(map.getCenter(), { icon: crossIcon, interactive: false }).addTo(map);
+
+    // Перемикання базових шарів (Esri/OSM)
     const switchLayer = () => {
       map.removeLayer(tileLayer);
       state.useEsri = !state.useEsri;
@@ -45,32 +83,12 @@ export const Map = component$(() => {
       ).addTo(map);
     };
 
-    // Подія для кнопки перемикання базової карти
     document.getElementById('switch-map-button')?.addEventListener('click', switchLayer);
 
-    // Створення центрального маркера із плюсом
-    const crossIcon = L.divIcon({
-      className: 'custom-cross-icon',
-      html: '+',
-      iconSize: [20, 20],
-      iconAnchor: [10, 27],
-    });
-    const crossMarker = L.marker(map.getCenter(), { icon: crossIcon, interactive: false }).addTo(map);
-
-    // Оновлення координат центру карти та положення центрального маркера
-    const updateCenterCoordinates = () => {
-      const { lat, lng } = map.getCenter();
-      state.centerCoordinates = `Center: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-      crossMarker.setLatLng(map.getCenter());
-    };
-    map.on('move', updateCenterCoordinates);
-    map.on('moveend', updateCenterCoordinates);
-    map.on('zoomend', updateCenterCoordinates);
-
-    // Масив для збереження доданих маркерів
+    // Масив для збереження маркерів
     let markers: L.Marker[] = [];
 
-    // Функція для обчислення відстані між двома маркерами за допомогою geolib
+    // Функція для обчислення відстані між двома маркерами
     const updateDistance = () => {
       if (markers.length === 2) {
         const latlng1 = markers[0].getLatLng();
@@ -85,14 +103,14 @@ export const Map = component$(() => {
       }
     };
 
-    // Додавання маркера за кліком по карті (якщо маркерів менше двох)
+    // Додавання маркера при кліку на карту (якщо їх менше двох)
     map.on('click', (e: L.LeafletMouseEvent) => {
       if (markers.length < 2) {
         const marker = L.marker(e.latlng, { draggable: true }).addTo(map);
         markers.push(marker);
         state.markerCoordinates = `Marker: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
 
-        // Видалення маркера при кліку
+        // Видалення маркера при кліку на нього
         marker.on('click', () => {
           map.removeLayer(marker);
           markers = markers.filter(m => m !== marker);
@@ -110,7 +128,7 @@ export const Map = component$(() => {
       }
     });
 
-    // Додавання маркера за кліком на кнопку
+    // Додавання маркера по кнопці
     document.getElementById('add-marker-button')?.addEventListener('click', () => {
       if (markers.length < 2) {
         const center = map.getCenter();
@@ -118,7 +136,6 @@ export const Map = component$(() => {
         markers.push(marker);
         state.markerCoordinates = `Marker: ${center.lat.toFixed(4)}, ${center.lng.toFixed(4)}`;
 
-        // Видалення маркера при кліку
         marker.on('click', () => {
           map.removeLayer(marker);
           markers = markers.filter(m => m !== marker);
@@ -126,7 +143,6 @@ export const Map = component$(() => {
           updateDistance();
         });
 
-        // Оновлення координат після перетягування маркера
         marker.on('dragend', (event) => {
           const { lat, lng } = event.target.getLatLng();
           state.markerCoordinates = `Marker: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
@@ -136,7 +152,7 @@ export const Map = component$(() => {
       }
     });
 
-    // Видалення останнього маркера за кліком на кнопку
+    // Видалення останнього маркера по кнопці
     document.getElementById('delete-marker-button')?.addEventListener('click', () => {
       if (markers.length > 0) {
         const lastMarker = markers.pop();
@@ -147,6 +163,9 @@ export const Map = component$(() => {
         }
       }
     });
+
+    // Початкове завантаження погоди для центра карти
+    updateCenterCoordinates();
   });
 
   return (
@@ -156,6 +175,7 @@ export const Map = component$(() => {
         centerCoordinates={state.centerCoordinates}
         markerCoordinates={state.markerCoordinates}
         distance={state.distance}
+        temperature={state.temperature}
       />
     </div>
   );
