@@ -37,15 +37,15 @@ app.post("/api/weather", async (req, res) => {
   console.log(`Received coordinates: lat=${latitude}, lng=${longitude}`);
 
   // Імітація отримання погоди (в майбутньому можна додати API)
-  const weatherData = {
+  const weatherDataTest = {
     location: { latitude, longitude },
     temperature: Math.floor(Math.random() * 30), // Випадкова температура
     condition: "Sunny", // Просто тестове значення
   };
 
-  res.json({ weatherData });
+  res.json({ weatherDataTest });
 
-  console.log("Weather data sent:", weatherData);
+  console.log("Weather data sent:", weatherDataTest);
 });
 
 
