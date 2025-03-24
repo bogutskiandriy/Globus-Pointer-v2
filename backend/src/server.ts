@@ -27,6 +27,7 @@ app.get("/", (_, res) => {
   res.send("Сервер працює!");
 });
 
+// API для отримання даних про температуру
 app.post("/api/weather", async (req, res) => {
   const { latitude, longitude } = req.body;
 
@@ -36,29 +37,39 @@ app.post("/api/weather", async (req, res) => {
 
   console.log(`Received coordinates: lat=${latitude}, lng=${longitude}`);
 
-  // Імітація (test) отримання погоди (в майбутньому можна додати API)
-  const weatherDataTest = {
-    location: { latitude, longitude },
-    temperature: Math.floor(Math.random() * 30), // Випадкова температура
-    condition: "Sunny", // Просто тестове значення
+  // Функція для отримання погоди з API Open-Meteo
+  const getWeatherData = async (lat: number, lng: number) => {
+    try {
+      
+      // Формуємо URL з параметром current_weather=true
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Failed to fetch weather data");
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching weather:", error);
+      throw error;
+    }
   };
 
-  res.json({ weatherDataTest });
+  try {
+    const weatherData = await getWeatherData(latitude, longitude);
+    console.log("Weather data received from API:", weatherData);
 
-  console.log("Weather data sent:", weatherDataTest);
-  // Реалізація відправки запиту на реальний API погоди
-
+    // Повертаємо лише дані про поточну погоду (temperature, windspeed тощо)
+    res.json(weatherData);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch weather data" });
+  }
 });
 
-
-
-// test data for blog posts
-
+// Test data for blog posts
 const filePath = path.resolve('src', 'data', 'posts.json');
 const posts: Post[] = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 
 app.get("/api/posts", (_, res) => {
   res.json(posts.map((post) => ({ title: post.title, date: post.date, description: post.description })));
 });
-
-

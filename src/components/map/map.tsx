@@ -9,18 +9,28 @@ import './map.css';
 dotenv.config();
 
 export const Map = component$(() => {
-
-  // Глобальний стан для збереження координат, перемикання шару, відстані та даних погоди
+  // Глобальний стан, включаючи дані про погоду
   const state = useStore<{
     centerCoordinates: string;
     markerCoordinates: string;
     useEsri: boolean;
     distance: string;
+    weather: any;
+    // Додаткові поля для погоди
+    temperature: string;
+    windspeed: string;
+    winddirection: string;
+    is_day: string;
   }>({
     centerCoordinates: 'Center: 0, 0',
     markerCoordinates: 'Marker: 0, 0',
     useEsri: true,
     distance: 'Distance: 0 m',
+    weather: null,
+    temperature: 'Temperature: 0 °C',
+    windspeed: 'Windspeed: 0 km/h',
+    winddirection: 'Wind direction: 0°',
+    is_day: 'Day',
   });
 
   useVisibleTask$(() => {
@@ -36,7 +46,7 @@ export const Map = component$(() => {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Створення центрального маркера з плюсом для позначення центру карти
+    // Створення центрального маркера з плюсом
     const crossIcon = L.divIcon({
       className: 'custom-cross-icon',
       html: '+',
@@ -45,47 +55,57 @@ export const Map = component$(() => {
     });
     const crossMarker = L.marker(map.getCenter(), { icon: crossIcon, interactive: false }).addTo(map);
 
-    // Функція оновлення центру карти та завантаження даних погоди для центру («+»)
-    const updateCenterCoordinates = async () => {
+    // Функція оновлення координат центру карти
+    const updateCenterCoordinates = () => {
       const center = map.getCenter();
       const { lat, lng } = center;
       state.centerCoordinates = `Center: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
       crossMarker.setLatLng(center);
     };
 
-    // Викликаємо оновлення даних погоди при русі та зумі карти
     map.on('move', updateCenterCoordinates);
     map.on('moveend', updateCenterCoordinates);
     map.on('zoomend', updateCenterCoordinates);
 
-    // Відправляєм дані з + на сервер для отримання погоди
-    const sendWeatherData = async () => {
-      const center = map.getCenter();
-      const { lat, lng } = center;
-    
+    updateCenterCoordinates();
+
+    // --- Код для оновлення даних погоди ---
+    const fetchWeatherData = async (lat: number, lng: number) => {
       try {
-        const response = await fetch('http://localhost:8000/api/weather', {
+        const response = await fetch("http://localhost:8000/api/weather", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ latitude: lat, longitude: lng }),
         });
-    
         if (!response.ok) {
           console.error("Failed to fetch weather data");
           return;
         }
-    
-        const weatherData = await response.json();
-        console.log("Weather data:", weatherData);
+        const result = await response.json();
+        // Очікуємо, що API повертає об'єкт з властивістю current_weather
+        const current = result.current_weather;
+        if (current) {
+          state.weather = current;
+          state.temperature = `Temperature: ${current.temperature} °C`;
+          state.windspeed = `Windspeed: ${current.windspeed} km/h`;
+          state.winddirection = `Wind direction: ${current.winddirection}°`;
+          state.is_day = current.is_day ? 'Day' : 'Night';
+        }
+        console.log("Weather updated:", result);
       } catch (error) {
-        console.error("Error sending weather data:", error);
+        console.error("Error fetching weather:", error);
       }
     };
 
-    updateCenterCoordinates();
-    sendWeatherData();
+    const updateWeather = () => {
+      const center = map.getCenter();
+      const { lat, lng } = center;
+      fetchWeatherData(lat, lng);
+    };
+
+    updateWeather();
+    const intervalId = setInterval(updateWeather, 10000); // оновлення кожні 10 секунд
+    // --- Кінець коду для погоди ---
 
     // Перемикання базових шарів (Esri/OSM)
     const switchLayer = () => {
@@ -103,7 +123,7 @@ export const Map = component$(() => {
     // Масив для збереження маркерів
     let markers: L.Marker[] = [];
 
-    // Функція для обчислення відстані між двома маркерами
+    // Функція для обчислення відстані між маркерами
     const updateDistance = () => {
       if (markers.length === 2) {
         const latlng1 = markers[0].getLatLng();
@@ -125,7 +145,7 @@ export const Map = component$(() => {
         markers.push(marker);
         state.markerCoordinates = `Marker: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
 
-        // Видалення маркера при кліку на нього
+        // Видалення маркера при кліку
         marker.on('click', () => {
           map.removeLayer(marker);
           markers = markers.filter(m => m !== marker);
@@ -178,6 +198,9 @@ export const Map = component$(() => {
         }
       }
     });
+
+    // Очищення інтервалу при виході
+    return () => clearInterval(intervalId);
   });
 
   return (
@@ -188,6 +211,11 @@ export const Map = component$(() => {
         centerCoordinates={state.centerCoordinates}
         markerCoordinates={state.markerCoordinates}
         distance={state.distance}
+        weather={state.weather}
+        temperature={state.temperature}
+        windspeed={state.windspeed}
+        winddirection={state.winddirection}
+        is_day={state.is_day}
       />
     </div>
   );

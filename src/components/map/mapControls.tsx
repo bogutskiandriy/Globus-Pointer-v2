@@ -5,6 +5,12 @@ interface MapControlsProps {
   markerCoordinates: string;
   useEsri: boolean;
   distance: string;
+  weather: any;
+  // Додаткові поля для погоди
+  temperature: string;
+  windspeed: string;
+  winddirection: string;
+  is_day: string;
 }
 
 export const MapControls = component$((props: MapControlsProps) => {
@@ -37,6 +43,14 @@ export const MapControls = component$((props: MapControlsProps) => {
       <div class="mt-2 text-white">{props.markerCoordinates}</div>}
       {props.distance && 
       <div class="mt-2 text-white">{props.distance}</div>}
+      {props.weather && (
+        <div class="mt-2 text-white">
+          <p>Temperature: {props.weather.temperature}</p>
+          <p class="mt-2">Windspeed: {props.weather.windspeed}</p>
+          <p class="mt-2">Wind direction: {props.weather.winddirection}</p>
+          <p class="mt-2">Is day: {props.weather.is_day}</p>
+        </div>
+      )}
     </div>
   );
 });
