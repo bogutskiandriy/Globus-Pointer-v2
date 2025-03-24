@@ -28,6 +28,11 @@ export default defineConfig(({ command, mode }): UserConfig => {
       tsconfigPaths(), 
       tailwindcss(),
     ],
+    build: {
+      rollupOptions: {
+        input: "src/entry.ssr.tsx", // Явно вказуємо вхідний файл
+      },
+    },
     // This tells Vite which dependencies to pre-build in dev mode.
     optimizeDeps: {
       // Put problematic deps that break bundling here, mostly those with binaries.
