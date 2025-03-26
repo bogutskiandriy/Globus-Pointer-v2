@@ -191,17 +191,7 @@ export const Map = component$(() => {
   return (
     <div class="flex flex-col items-center m-5">
       <div id="map" class="w-full h-[500px]" />
-      <MapControls
-        useEsri={state.useEsri}
-        centerCoordinates={state.centerCoordinates}
-        markerCoordinates={state.markerCoordinates}
-        distance={state.distance}
-        weather={state.weather}
-        temperature={state.temperature}
-        windspeed={state.windspeed}
-        winddirection={state.winddirection}
-        is_day={state.is_day}
-      />
+      <MapControls {...state} />
     </div>
   );
 });
