@@ -1,7 +1,6 @@
-import { component$, useStore, useVisibleTask$ } from '@builder.io/qwik';
-import L from 'leaflet';
+import { component$, useStore, useVisibleTask$, } from '@builder.io/qwik';
 import { getDistance } from 'geolib';
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 import { MapControls } from './mapControls';
 import 'leaflet/dist/leaflet.css';
 import './map.css';
@@ -9,19 +8,7 @@ import './map.css';
 dotenv.config();
 
 export const Map = component$(() => {
-  // Глобальний стан, включаючи дані про погоду
-  const state = useStore<{
-    centerCoordinates: string;
-    markerCoordinates: string;
-    useEsri: boolean;
-    distance: string;
-    weather: any;
-    // Додаткові поля для погоди
-    temperature: string;
-    windspeed: string;
-    winddirection: string;
-    is_day: string;
-  }>({
+  const state = useStore({
     centerCoordinates: 'Center: 0, 0',
     markerCoordinates: 'Marker: 0, 0',
     useEsri: true,
@@ -33,20 +20,26 @@ export const Map = component$(() => {
     is_day: 'Day',
   });
 
-  useVisibleTask$(() => {
+  // Виконується лише в браузері, після рендеру та коли DOM готовий
+  useVisibleTask$(async () => {
+    // 1. Динамічно імпортуємо leaflet (JS)
+    const leafletModule = await import('leaflet');
+    const L = leafletModule.default;
+
+    // 2. Шукаємо елемент карти
     const mapElement = document.getElementById('map');
     if (!mapElement || mapElement.dataset.loaded) return;
     mapElement.dataset.loaded = 'true';
 
-    // Ініціалізація карти (початковий вигляд для Львова)
+    // 3. Ініціалізація карти (Львів)
     const map = L.map(mapElement).setView([49.8397, 24.0297], 10);
 
-    // Додавання шару OpenStreetMap
+    // 4. Додаємо шар OpenStreetMap
     let tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
+      attribution: '© OpenStreetMap contributors',
     }).addTo(map);
 
-    // Створення центрального маркера з плюсом
+    // 5. Створюємо «плюсик» у центрі
     const crossIcon = L.divIcon({
       className: 'custom-cross-icon',
       html: '+',
@@ -55,7 +48,6 @@ export const Map = component$(() => {
     });
     const crossMarker = L.marker(map.getCenter(), { icon: crossIcon, interactive: false }).addTo(map);
 
-    // Функція оновлення координат центру карти
     const updateCenterCoordinates = () => {
       const center = map.getCenter();
       const { lat, lng } = center;
@@ -66,10 +58,9 @@ export const Map = component$(() => {
     map.on('move', updateCenterCoordinates);
     map.on('moveend', updateCenterCoordinates);
     map.on('zoomend', updateCenterCoordinates);
-
     updateCenterCoordinates();
 
-    // --- Код для оновлення даних погоди ---
+    // --- КОД ДЛЯ ПОГОДИ ---
     const fetchWeatherData = async (lat: number, lng: number) => {
       try {
         const response = await fetch("http://localhost:8000/api/weather", {
@@ -82,7 +73,6 @@ export const Map = component$(() => {
           return;
         }
         const result = await response.json();
-        // Очікуємо, що API повертає об'єкт з властивістю current_weather
         const current = result.current_weather;
         if (current) {
           state.weather = current;
@@ -99,15 +89,13 @@ export const Map = component$(() => {
 
     const updateWeather = () => {
       const center = map.getCenter();
-      const { lat, lng } = center;
-      fetchWeatherData(lat, lng);
+      fetchWeatherData(center.lat, center.lng);
     };
 
     updateWeather();
-    const intervalId = setInterval(updateWeather, 10000); // оновлення кожні 10 секунд
-    // --- Кінець коду для погоди ---
+    const intervalId = setInterval(updateWeather, 10000);
 
-    // Перемикання базових шарів (Esri/OSM)
+    // --- Перемикання базових шарів (Esri / OSM) ---
     const switchLayer = () => {
       map.removeLayer(tileLayer);
       state.useEsri = !state.useEsri;
@@ -120,10 +108,9 @@ export const Map = component$(() => {
     };
     document.getElementById('switch-map-button')?.addEventListener('click', switchLayer);
 
-    // Масив для збереження маркерів
+    // --- Маркери ---
     let markers: L.Marker[] = [];
 
-    // Функція для обчислення відстані між маркерами
     const updateDistance = () => {
       if (markers.length === 2) {
         const latlng1 = markers[0].getLatLng();
@@ -138,14 +125,13 @@ export const Map = component$(() => {
       }
     };
 
-    // Додавання маркера при кліку на карту (якщо їх менше двох)
+    // Клік на карту — додати маркер
     map.on('click', (e: L.LeafletMouseEvent) => {
       if (markers.length < 2) {
         const marker = L.marker(e.latlng, { draggable: true }).addTo(map);
         markers.push(marker);
         state.markerCoordinates = `Marker: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
 
-        // Видалення маркера при кліку
         marker.on('click', () => {
           map.removeLayer(marker);
           markers = markers.filter(m => m !== marker);
@@ -153,7 +139,6 @@ export const Map = component$(() => {
           updateDistance();
         });
 
-        // Оновлення координат після перетягування маркера
         marker.on('dragend', (event) => {
           const { lat, lng } = event.target.getLatLng();
           state.markerCoordinates = `Marker: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
@@ -187,7 +172,7 @@ export const Map = component$(() => {
       }
     });
 
-    // Видалення останнього маркера по кнопці
+    // Видалення останнього маркера
     document.getElementById('delete-marker-button')?.addEventListener('click', () => {
       if (markers.length > 0) {
         const lastMarker = markers.pop();
@@ -199,9 +184,9 @@ export const Map = component$(() => {
       }
     });
 
-    // Очищення інтервалу при виході
+    // При «знятті» компонента очищаємо інтервал
     return () => clearInterval(intervalId);
-  });
+  }); // <-- виконується на клієнті, коли DOM готовий
 
   return (
     <div class="flex flex-col items-center m-5">
