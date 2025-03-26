@@ -125,7 +125,7 @@ module.exports = {
       'logical-assignment-operators': 'error',
       'no-else-return': 'error',
       'no-mixed-operators': 'error',
-      'no-console': 'error',
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-process-exit': 'error',
       'no-fallthrough': [
         'error',
@@ -209,6 +209,17 @@ module.exports = {
       'one-var': ['error', 'never'],
   
       'unicorn/no-typeof-undefined': 'error',
+      'import/order': [
+        'error',
+        {
+          groups: [['builtin', 'external'], 'internal', ['parent', 'sibling', 'index']],
+          'newlines-between': 'always',
+        },
+      ],
+      'no-unused-vars': ['error', { vars: 'all', args: 'after-used', ignoreRestSiblings: true }],
+      'prefer-const': 'error',
+      'no-var': 'error',
+      'arrow-body-style': ['error', 'as-needed'],
     },
     overrides: [
       {
