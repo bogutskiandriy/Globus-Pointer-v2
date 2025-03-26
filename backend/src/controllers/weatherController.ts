@@ -8,7 +8,7 @@ export const getWeather = async (req: Request, res: Response, next: NextFunction
     return;
   }
 
-  console.log(`Received coordinates: lat=${latitude}, lng=${longitude}`);
+  // console.log(`Received coordinates: lat=${latitude}, lng=${longitude}`);
 
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
@@ -16,7 +16,7 @@ export const getWeather = async (req: Request, res: Response, next: NextFunction
     if (!response.ok) throw new Error(`Failed to fetch weather data: ${response.statusText}`);
 
     const data = await response.json();
-    console.log("Weather data received:", data);
+    // console.log("Weather data received:", data);
     res.json(data);
   } catch (error) {
     console.error("Error fetching weather data:", error);
