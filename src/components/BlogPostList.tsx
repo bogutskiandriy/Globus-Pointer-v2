@@ -1,9 +1,8 @@
 import { component$, useSignal, useTask$ } from "@builder.io/qwik";
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 
 dotenv.config();
-
-const BACKEND = process.env["BACKEND_URL"];
+const BACKEND = process.env.BACKEND_URL; // Default to localhost if not set
 
 interface BlogPost {
   title: string;
@@ -17,13 +16,13 @@ export const BlogPostList = component$(() => {
 
   useTask$(async () => {
     try {
-      const response = await fetch(`${BACKEND}/api/posts`); // Use the BACKEND constant
+      const response = await fetch(`${BACKEND}/api/posts`); // Fetch posts from the backend
       if (!response.ok) {
         throw new Error("Failed to fetch blog posts");
       }
-      posts.value = await response.json();
+      posts.value = await response.json(); // Update the posts signal
     } catch (error) {
-      console.error("Error fetching blog posts:", error);
+      console.error("❌ Error fetching blog posts:", error);
     }
   });
 

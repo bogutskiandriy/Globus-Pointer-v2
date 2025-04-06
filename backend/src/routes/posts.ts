@@ -1,16 +1,9 @@
 import { Router } from "express";
-import { getPosts } from "../controllers/postsControllers.ts";
+import { getPosts } from "../controllers/postsController"; // Правильний шлях до контролера
 
 const router = Router();
 
-// GET route for fetching posts
-router.get("/", async (req, res, next) => {
-  try {
-    await getPosts(req, res);
-  } catch (error) {
-    console.error("Error in posts route:", error);
-    next(error); // Pass errors to the error-handling middleware
-  }
-});
+// Отримання всіх постів
+router.get("/", getPosts);
 
 export default router;

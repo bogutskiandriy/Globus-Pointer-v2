@@ -1,5 +1,5 @@
 import express from "express";
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import weatherRoutes from "./routes/weather.ts"; // Ensure this matches the actual file path
 import postsRoutes from "./routes/posts.ts"; // Ensure this matches the actual file path
@@ -19,7 +19,7 @@ app.use("/api/weather", weatherRoutes);
 app.use("/api/posts", postsRoutes);
 
 // Error-handling middleware
-app.use((err: Error, _req: Request, res: Response) => {
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error("Unhandled error:", err);
   res.status(500).json({ error: "Internal Server Error" });
 });
