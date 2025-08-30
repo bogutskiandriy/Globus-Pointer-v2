@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getPosts } from "../controllers/postsController"; // Правильний шлях до контролера
+import { getPosts } from "../controllers/postsController.ts"; // Правильний шлях до контролера
 
 const router = Router();
 

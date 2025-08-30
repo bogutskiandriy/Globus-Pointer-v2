@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import Post from "../models/post"; // Ensure this path is correct
+import Post from "../models/post.ts"; // Ensure this path is correct
 
 
 export const getPosts = async (_: Request, res: Response, next: NextFunction): Promise<void> => {
